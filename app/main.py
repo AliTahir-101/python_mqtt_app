@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from .services.mqtt_client import MQTTClient
-from .routes.health_check import router as health_check_router
+from .routes.v1.api import router as v1_router
+from .routes.v1.health_check import router as health_router
 
 load_dotenv()  # Load environment variables
 
@@ -30,4 +31,5 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(health_check_router)
+app.include_router(v1_router, prefix="/api/v1")
+app.include_router(health_router, prefix="/api/v1")
