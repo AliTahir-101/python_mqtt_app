@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from .services.mqtt_client import MQTTClient
@@ -27,15 +27,21 @@ async def lifespan(app: FastAPI):
 
     :param app: Instance of the FastAPI application.
     """
-    print("Starting MQTT client...")
-    mqtt_client.start()
+    try:
+        print("Starting MQTT client...")
+        mqtt_client.start()
 
-    yield
+        yield
 
-    # Clean up and release the resources on app shutdown
-    print("Shutting down MQTT client...")
-    mqtt_client.stop()
+    except Exception as e:
+        # Handle any unexpected exceptions and raise an HTTPException with a 500 status code
+        raise HTTPException(
+            status_code=500, detail="Internal Server Error. Please try again later.")
 
+    finally:
+        # Clean up and release the resources on app shutdown
+        print("Shutting down MQTT client...")
+        mqtt_client.stop()
 
 app = FastAPI(lifespan=lifespan)
 
