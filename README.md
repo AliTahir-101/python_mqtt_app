@@ -22,7 +22,7 @@ Before running this project, ensure you have the following installed:
 1. **Clone the Repository:**
 
    ```bash
-   git clone repo_url
+   git clone git@github.com:AliTahir-101/python_mqtt_app.git
    cd python_mqtt_app
    ```
 
