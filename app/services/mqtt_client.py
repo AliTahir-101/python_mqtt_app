@@ -4,6 +4,8 @@ import json
 import threading
 import datetime
 from typing import Any, Dict
+from .database_client import DatabaseClient
+from ..models.mqtt_model import LogEntry
 
 
 class MQTTClient:
@@ -30,6 +32,7 @@ class MQTTClient:
         self.port: int = port
         self.topic: str = topic
         self.running: bool = False
+        self.db_client = DatabaseClient()
 
         # Set up callbacks
         self.client.on_connect = self.on_connect
@@ -61,13 +64,16 @@ class MQTTClient:
         payload: str = message.payload.decode("utf-8")
         payload_data: Dict = json.loads(payload)
 
-        log_entry: Dict[str, Any] = {
-            "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-            "topic": message.topic,
-            "payload": payload_data
-        }
+        # Create a LogEntry instance
+        log_entry = LogEntry(
+            timestamp=timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+            topic=message.topic,
+            payload=payload_data
+        )
 
-        print(f"Received message: {json.dumps(log_entry)}")
+        # Save the log entry to the database
+        self.db_client.save_message(log_entry.model_dump())
+        print(f"Received message: {log_entry.model_dump_json()}")
 
     def start(self) -> None:
         """
