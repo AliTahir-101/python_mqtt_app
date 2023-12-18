@@ -1,10 +1,15 @@
 import os
+import logging
 from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from .services.mqtt_client import MQTTClient
 from .routes.v1.api import router as v1_router
 from .routes.v1.health_check import router as health_router
+
+# Configure the logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()  # Load environment variables from a .env file
 
@@ -28,19 +33,20 @@ async def lifespan(app: FastAPI):
     :param app: Instance of the FastAPI application.
     """
     try:
-        print("Starting MQTT client...")
+        logger.info("Starting MQTT client...")
         mqtt_client.start()
 
         yield
 
     except Exception as e:
         # Handle any unexpected exceptions and raise an HTTPException with a 500 status code
+        logger.exception("Internal Server Error. Please try again later.")
         raise HTTPException(
             status_code=500, detail="Internal Server Error. Please try again later.")
 
     finally:
         # Clean up and release the resources on app shutdown
-        print("Shutting down MQTT client...")
+        logger.info("Shutting down MQTT client...")
         mqtt_client.stop()
 
 app = FastAPI(lifespan=lifespan)

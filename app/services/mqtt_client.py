@@ -3,6 +3,7 @@ import time
 import json
 import threading
 import datetime
+import logging
 from typing import Any, Dict
 from .database_client import DatabaseClient
 from ..models.mqtt_model import LogEntry
@@ -27,6 +28,7 @@ class MQTTClient:
             port (int): The port number of the MQTT broker.
             topic (str): The MQTT topic to subscribe to.
         """
+        self.logger = logging.getLogger(__name__)
         self.client = mqtt.Client()
         self.broker: str = broker
         self.port: int = port
@@ -49,10 +51,10 @@ class MQTTClient:
             rc (int): The connection result.
         """
         if rc == 0:
-            print(f"Connected with result code {rc}")
+            self.logger.info(f"Connected with result code {rc}")
             client.subscribe(self.topic)
         else:
-            print(f"Connection failed with result code {rc}")
+            self.logger.error(f"Connection failed with result code {rc}")
 
     def on_message(self, client: mqtt.Client, userdata: Any, message: mqtt.MQTTMessage) -> None:
         """
@@ -77,10 +79,11 @@ class MQTTClient:
 
             # Save the log entry to the database
             self.db_client.save_message(log_entry.model_dump())
-            print(f"Received message: {log_entry.model_dump_json()}")
+            self.logger.info(
+                f"Received message: {log_entry.model_dump_json()}")
         except Exception as e:
             # Handle any exceptions that might occur during message processing
-            print(f"Error processing message: {str(e)}")
+            self.logger.exception(f"Error processing message: {str(e)}")
 
     def start(self) -> None:
         """
@@ -93,7 +96,7 @@ class MQTTClient:
             threading.Thread(target=self.publish_message_periodically).start()
         except Exception as e:
             # Handle connection-related exceptions and log the error
-            print(f"MQTT Client Error: {str(e)}")
+            self.logger.exception(f"MQTT Client Error: {str(e)}")
 
     def publish_message_periodically(self) -> None:
         """
@@ -111,7 +114,7 @@ class MQTTClient:
                 time.sleep(60)
             except Exception as e:
                 # Handle publishing-related exceptions and log the error
-                print(f"MQTT Publish Error: {str(e)}")
+                self.logger.exception(f"MQTT Publish Error: {str(e)}")
 
     def stop(self) -> None:
         """
@@ -123,4 +126,4 @@ class MQTTClient:
             self.client.disconnect()
         except Exception as e:
             # Handle disconnection-related exceptions and log the error
-            print(f"MQTT Disconnect Error: {str(e)}")
+            self.logger.exception(f"MQTT Disconnect Error: {str(e)}")

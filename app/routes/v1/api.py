@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from fastapi import APIRouter, HTTPException
 from ...services.database_client import DatabaseClient
@@ -5,6 +6,7 @@ from ...models.mqtt_model import LogEntry
 
 router = APIRouter()
 db_client = DatabaseClient()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/messages", response_model=List[LogEntry])
@@ -23,5 +25,7 @@ def get_all_messages():
         messages = db_client.get_all_messages()
         return [LogEntry(**message).model_dump(by_alias=True) for message in messages]
     except Exception as e:
+        logger.exception(
+            f"Internal Server Error. {str(e)}")
         raise HTTPException(
             status_code=500, detail="Internal Server Error. Please try again later.")

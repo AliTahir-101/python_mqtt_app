@@ -1,4 +1,5 @@
 import os
+import logging
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
@@ -21,10 +22,12 @@ class DatabaseClient:
         Initializes the database client and connects to the default database specified in MONGODB_URI.
         """
         try:
+            self.logger = logging.getLogger(__name__)
             self.client = MongoClient(os.getenv("MONGODB_URI"))
             self.db = self.client.get_default_database()
         except Exception as e:
             # Handle connection-related exceptions and log the error
+            self.logger.exception(f"Database Connection Error: {str(e)}")
             raise ConnectionError(f"Database Connection Error: {str(e)}")
 
     def save_message(self, message: dict) -> None:
@@ -36,6 +39,7 @@ class DatabaseClient:
             self.db.messages.insert_one(message)
         except Exception as e:
             # Handle insertion-related exceptions and log the error
+            self.logger.exception(f"Database Insertion Error: {str(e)}")
             raise DatabaseError(f"Database Insertion Error: {str(e)}")
 
     def get_all_messages(self) -> list:
@@ -47,6 +51,7 @@ class DatabaseClient:
             return list(self.db.messages.find({}))
         except Exception as e:
             # Handle query-related exceptions and log the error
+            self.logger.exception(f"Database Query Error: {str(e)}")
             raise DatabaseError(f"Database Query Error: {str(e)}")
 
     def close_connection(self):
