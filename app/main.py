@@ -1,11 +1,19 @@
+import os
 from fastapi import FastAPI
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from .services.mqtt_client import MQTTClient
 from .routes.health_check import router as health_check_router
 
+load_dotenv()  # Load environment variables
+
+mqtt_broker_url = os.getenv("MQTT_BROKER_URL")
+mqtt_broker_port = int(os.getenv("MQTT_BROKER_PORT"))
+mqtt_topic = os.getenv("MQTT_TOPIC")
+
 # MQTT Client Setup
-mqtt_client = MQTTClient(broker="127.0.0.1",
-                         port=1883, topic="charger/1/connector/1/session/1")
+mqtt_client = MQTTClient(broker=mqtt_broker_url,
+                         port=mqtt_broker_port, topic=mqtt_topic)
 
 
 @asynccontextmanager
