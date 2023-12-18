@@ -29,6 +29,7 @@ class MQTTClient:
         self.broker: str = broker
         self.port: int = port
         self.topic: str = topic
+        self.running: bool = False
 
         # Set up callbacks
         self.client.on_connect = self.on_connect
@@ -72,6 +73,7 @@ class MQTTClient:
         """
         Starts the MQTT client and connects it to the broker. Also starts a thread for publishing messages periodically.
         """
+        self.running = True
         self.client.connect(self.broker, self.port, 60)
         self.client.loop_start()
         threading.Thread(target=self.publish_message_periodically).start()
@@ -80,7 +82,7 @@ class MQTTClient:
         """
         Publishes messages to the MQTT topic periodically every 60 seconds.
         """
-        while True:
+        while self.running:
             message: Dict[str, Any] = {
                 "session_id": 1,
                 "energy_delivered_in_kWh": 30,
@@ -94,5 +96,6 @@ class MQTTClient:
         """
         Stops the MQTT client and disconnects it from the broker.
         """
+        self.running = False
         self.client.loop_stop()
         self.client.disconnect()
