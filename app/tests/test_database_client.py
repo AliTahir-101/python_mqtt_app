@@ -32,9 +32,18 @@ def test_save_message_success():
     with patch('app.services.database_client.MongoClient') as mock_mongo:
         client = DatabaseClient()
         mock_mongo.return_value.get_default_database.return_value.messages.insert_one = MagicMock()
-        client.save_message({"test": "message"})
+        client.save_message({
+            "session_id": 1,
+            "energy_delivered_in_kWh": 30,
+            "duration_in_seconds": 45,
+            "session_cost_in_cents": 70
+        })
         mock_mongo.return_value.get_default_database.return_value.messages.insert_one.assert_called_with({
-                                                                                                         "test": "message"})
+            "session_id": 1,
+            "energy_delivered_in_kWh": 30,
+            "duration_in_seconds": 45,
+            "session_cost_in_cents": 70
+        })
 
 
 def test_save_message_failure():
@@ -47,7 +56,12 @@ def test_save_message_failure():
             "Insertion failed")
         client = DatabaseClient()
         with pytest.raises(DatabaseError):
-            client.save_message({"test": "message"})
+            client.save_message({
+                "session_id": 1,
+                "energy_delivered_in_kWh": 30,
+                "duration_in_seconds": 45,
+                "session_cost_in_cents": 70
+            })
 
 
 def test_get_all_messages_success():
@@ -56,11 +70,30 @@ def test_get_all_messages_success():
     Validates that the returned value matches the expected mock data.
     """
     with patch('app.services.database_client.MongoClient') as mock_mongo:
-        mock_mongo.return_value.get_default_database.return_value.messages.find.return_value = [
-            {"message": "test"}, {"message": "test"}]
+        mock_mongo.return_value.get_default_database.return_value.messages.find.return_value = [{
+            "session_id": 1,
+            "energy_delivered_in_kWh": 30,
+            "duration_in_seconds": 45,
+            "session_cost_in_cents": 70
+        }, {
+            "session_id": 1,
+            "energy_delivered_in_kWh": 30,
+            "duration_in_seconds": 45,
+            "session_cost_in_cents": 70
+        }]
         client = DatabaseClient()
         result = client.get_all_messages()
-        assert result == [{"message": "test"}, {"message": "test"}]
+        assert result == [{
+            "session_id": 1,
+            "energy_delivered_in_kWh": 30,
+            "duration_in_seconds": 45,
+            "session_cost_in_cents": 70
+        }, {
+            "session_id": 1,
+            "energy_delivered_in_kWh": 30,
+            "duration_in_seconds": 45,
+            "session_cost_in_cents": 70
+        }]
 
 
 def test_get_all_messages_failure():
