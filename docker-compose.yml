@@ -22,3 +22,12 @@ services:
     image: mongo
     ports:
       - "27017:27017"
+
+  test:
+      build: .
+      env_file:
+        - .env
+      depends_on:
+        - mosquitto
+        - mongo
+      command: pytest

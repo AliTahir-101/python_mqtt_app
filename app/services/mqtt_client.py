@@ -6,7 +6,7 @@ import datetime
 import logging
 from typing import Any, Dict
 from .database_client import DatabaseClient
-from ..models.mqtt_model import LogEntry
+from app.models.mqtt_model import LogEntry
 
 
 class MQTTClient:
