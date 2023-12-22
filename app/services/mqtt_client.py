@@ -7,6 +7,7 @@ import logging
 from typing import Any, Dict
 from .database_client import DatabaseClient
 from app.models.mqtt_model import LogEntry, Payload
+from helpers.energy_session_simulator import EnergySessionSimulator
 from pydantic import ValidationError
 
 
@@ -100,6 +101,7 @@ class MQTTClient:
         """
         try:
             self.running = True
+            self.simulator = EnergySessionSimulator()
             self.client.connect(self.broker, self.port, 60)
             self.client.loop_start()
             threading.Thread(target=self.publish_message_periodically).start()
@@ -113,13 +115,9 @@ class MQTTClient:
         """
         while self.running:
             try:
-                message: Dict[str, Any] = {
-                    "session_id": 1,
-                    "energy_delivered_in_kWh": 30.10,
-                    "duration_in_seconds": 45,
-                    "session_cost_in_cents": 70
-                }
-                self.client.publish(self.topic, json.dumps(message))
+                message = json.dumps(
+                    self.simulator.simulate_energy_session_payload())
+                self.client.publish(self.topic, message)
                 time.sleep(60)
             except Exception as e:
                 # Handle publishing-related exceptions and log the error
