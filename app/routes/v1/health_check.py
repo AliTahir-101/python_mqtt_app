@@ -1,14 +1,15 @@
 from fastapi import APIRouter
+from app.models.health_check_model import HealthCheckResponse
 
 router = APIRouter()
 
 
-@router.get("/health")
+@router.get("/health", response_model=HealthCheckResponse)
 def health_check():
     """
     Health Check Endpoint
 
     Returns:
-        dict: A dictionary with a status indicating the health of the service.
+        HealthCheckResponse: A response model indicating the health of the service.
     """
     return {"status": "ok"}
