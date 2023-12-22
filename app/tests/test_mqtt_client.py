@@ -114,3 +114,75 @@ def test_stop_publish_thread(mock_mqtt_client, mock_db_client, mock_thread):
     mqtt_client.stop()
 
     assert not mqtt_client.running, "MQTT client running flag should be False"
+
+
+def test_on_message_valid_payload(mock_mqtt_client, mock_db_client):
+    """
+    Test the handling of a valid MQTT message by the MQTTClient.
+    This test simulates receiving a valid MQTT message and ensures it is processed correctly,
+    including saving the message to the database.
+    """
+    mqtt_client = MQTTClient("broker.test", 1883, "test/topic")
+    mqtt_client.db_client = mock_db_client
+
+    valid_message = MQTTMessage()
+    valid_message.payload = json.dumps({
+        "session_id": 1,
+        "energy_delivered_in_kWh": 30.0,
+        "duration_in_seconds": 45,
+        "session_cost_in_cents": 70
+    }).encode()
+    valid_message.topic = b'test/topic'
+
+    mqtt_client.on_message(mock_mqtt_client, None, valid_message)
+
+    assert mock_db_client.save_message.called, "Message should be saved for valid payload"
+
+
+def test_on_message_invalid_payload(mock_mqtt_client, mock_db_client):
+    """
+    Test the handling of an invalid MQTT message by the MQTTClient.
+    This test simulates receiving an MQTT message with invalid payload data,
+    and checks that the message is not processed or saved to the database.
+    """
+    mqtt_client = MQTTClient("broker.test", 1883, "test/topic")
+    mqtt_client.db_client = mock_db_client
+
+    invalid_message = MQTTMessage()
+    invalid_message.payload = json.dumps({
+        "session_id": 1,
+        "energy_delivered_in_kWh": "invalid",  # Invalid type
+        "duration_in_seconds": 45,
+        "session_cost_in_cents": 70
+    }).encode()
+    invalid_message.topic = b'test/topic'
+
+    mqtt_client.on_message(mock_mqtt_client, None, invalid_message)
+
+    assert not mock_db_client.save_message.called, "Message should not be saved for invalid payload"
+
+
+def test_on_message_exception_handling(mock_mqtt_client, mock_db_client, caplog):
+    """
+    Test exception handling in the MQTTClient's on_message method.
+    This test simulates an exception during the message processing to ensure
+    that exceptions are handled gracefully and logged correctly.
+    """
+    mqtt_client = MQTTClient("broker.test", 1883, "test/topic")
+    mqtt_client.db_client = mock_db_client
+
+    # Let's Simulate an exception in message handling
+    mock_db_client.save_message.side_effect = Exception("Test exception")
+
+    message = MQTTMessage()
+    message.payload = json.dumps({
+        "session_id": 1,
+        "energy_delivered_in_kWh": 30.0,
+        "duration_in_seconds": 45,
+        "session_cost_in_cents": 70
+    }).encode()
+    message.topic = b'test/topic'
+
+    mqtt_client.on_message(mock_mqtt_client, None, message)
+
+    assert "Error processing message" in caplog.text, "Exception should be logged"
