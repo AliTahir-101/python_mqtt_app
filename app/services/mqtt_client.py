@@ -6,7 +6,8 @@ import datetime
 import logging
 from typing import Any, Dict
 from .database_client import DatabaseClient
-from app.models.mqtt_model import LogEntry
+from app.models.mqtt_model import LogEntry, Payload
+from pydantic import ValidationError
 
 
 class MQTTClient:
@@ -70,11 +71,18 @@ class MQTTClient:
             payload: str = message.payload.decode("utf-8")
             payload_data: Dict = json.loads(payload)
 
+            # Validate the payload data against the Payload model to ensure that model and the payload response matches
+            try:
+                validated_payload = Payload(**payload_data)
+            except ValidationError as e:
+                self.logger.error(f"Payload validation error: {e.json()}")
+                return  # Exit the function if validation fails
+
             # Create a LogEntry instance
             log_entry = LogEntry(
                 timestamp=timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                 topic=message.topic,
-                payload=payload_data
+                payload=validated_payload.model_dump()
             )
 
             # Save the log entry to the database
@@ -106,7 +114,7 @@ class MQTTClient:
             try:
                 message: Dict[str, Any] = {
                     "session_id": 1,
-                    "energy_delivered_in_kWh": 30,
+                    "energy_delivered_in_kWh": 30.10,
                     "duration_in_seconds": 45,
                     "session_cost_in_cents": 70
                 }
