@@ -86,9 +86,10 @@ class MQTTClient:
             )
 
             # Save the log entry to the database
-            self.db_client.save_message(log_entry.model_dump())
+            self.db_client.save_message(
+                log_entry.model_dump(exclude_none=True))
             self.logger.info(
-                f"Received message: {log_entry.model_dump_json()}")
+                f"Received message: {log_entry.model_dump_json(exclude_none=True)}")
         except Exception as e:
             # Handle any exceptions that might occur during message processing
             self.logger.exception(f"Error processing message: {str(e)}")

@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field, TypeAdapter, ValidationError
-from typing import Any
-from bson import ObjectId
+from pydantic import BaseModel, Field
+from bson import ObjectId, Optional
 
 
 class Payload(BaseModel):
@@ -20,7 +19,6 @@ class Payload(BaseModel):
 class PyObjectId(ObjectId):
     """
     Custom type for handling BSON ObjectId for Pydantic models.
-    This uses TypeAdapter for type conversion and custom validation.
     """
 
     @classmethod
@@ -46,12 +44,12 @@ class PyObjectId(ObjectId):
 class LogEntry(BaseModel):
     """
     Model representing a log entry with the following attributes:
-    id: PyObjectId representing the log entry ID.
+    id: PyObjectId representing the log entry DB ID.
     timestamp: String representing the timestamp of the log entry.
     topic: String representing the log topic.
     payload: Payload object representing the log payload.
     """
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[PyObjectId] = Field(None, alias="_id")
     timestamp: str
     topic: str
     payload: Payload
