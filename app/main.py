@@ -1,7 +1,7 @@
 import os
 import logging
 from fastapi import FastAPI, HTTPException
-from dotenv import load_dotenv
+from app.config import Config
 from contextlib import asynccontextmanager
 from .services.mqtt_client import MQTTClient
 from .routes.v1.api import router as v1_router
@@ -11,12 +11,10 @@ from .routes.v1.health_check import router as health_router
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-load_dotenv()  # Load environment variables from a .env file
-
-# Retrieve MQTT broker configuration from environment variables
-mqtt_broker_url = os.getenv("MQTT_BROKER_URL")
-mqtt_broker_port = int(os.getenv("MQTT_BROKER_PORT"))
-mqtt_topic = os.getenv("MQTT_TOPIC")
+# Retrieve MQTT broker configuration
+mqtt_broker_url = Config.MQTT_BROKER_URL
+mqtt_broker_port = Config.MQTT_BROKER_PORT
+mqtt_topic = Config.MQTT_TOPIC
 
 # Initialize and configure the MQTT client
 mqtt_client = MQTTClient(broker=mqtt_broker_url,

@@ -1,9 +1,7 @@
 import os
 import logging
 from pymongo import MongoClient
-from dotenv import load_dotenv
-
-load_dotenv()  # Load environment variables from a .env file
+from ..config import Config
 
 
 class DatabaseError(Exception):
@@ -23,7 +21,7 @@ class DatabaseClient:
         """
         try:
             self.logger = logging.getLogger(__name__)
-            self.client = MongoClient(os.getenv("MONGODB_URI"))
+            self.client = MongoClient(Config.MONGODB_URI)
             self.db = self.client.get_default_database()
         except Exception as e:
             # Handle connection-related exceptions and log the error
