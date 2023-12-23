@@ -1,3 +1,5 @@
+from fastapi.openapi.utils import get_openapi
+from fastapi.openapi.docs import get_swagger_ui_html
 import os
 import logging
 from fastapi import FastAPI, HTTPException
@@ -47,7 +49,44 @@ async def lifespan(app: FastAPI):
         logger.info("Shutting down MQTT client...")
         mqtt_client.stop()
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title="IoT Energy Session Tracking API",
+    description=(
+        "This API interfaces with an MQTT broker to receive data from IoT devices about energy consumption sessions. "
+        "It logs these messages, stores them in a MongoDB database, and provides an endpoint to retrieve the session data. "
+        "The API simulates various devices in a household and their energy usage. Data is simulated and updated every minute."
+    ),
+    version="1.0.0",
+    contact={
+        "name": "Energy Tracker Support",
+        "email": "support@enersense.com",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+)
+
+# Apparently we don't need these but we can do more customization if we want, leaving these here just for an example.
+# @app.get("/docs", include_in_schema=False)
+# async def custom_swagger_ui_html():
+#     return get_swagger_ui_html(
+#         openapi_url="/custom-openapi.json",
+#         title="Customized Swagger UI",
+#         swagger_js_url="/static/swagger-ui-bundle.js",
+#         swagger_css_url="/static/swagger-ui.css"
+#     )
+
+
+# @app.get("/custom-openapi.json", include_in_schema=False)
+# async def custom_openapi():
+#     return get_openapi(
+#         title="Custom API",
+#         version="1.0.0",
+#         description="This is a custom OpenAPI schema",
+#         routes=app.routes
+#     )
 
 # Include routers for different endpoints
 app.include_router(v1_router, prefix="/api/v1")
