@@ -62,8 +62,8 @@ Before running this project, ensure you have the following installed:
 To run tests, use the following command:
 
 ```bash
-sudo docker-compose build --no-cache (optional if build already)
-sudo docker-compose run test
+sudo docker-compose down  --remove-orphans (optional in case bind: address error)
+sudo docker-compose run --rm --no-deps app pytest
 ```
 
 ## Structure
@@ -71,7 +71,8 @@ sudo docker-compose run test
 ```bash
 /python_mqtt_app
 ├── app/                  # Application source files
-├── tests/                # Test cases
+├── helpers/              # Helper Modules
+├── .env                  # Environment configuration File
 ├── Dockerfile            # Dockerfile for Python app
 ├── docker-compose.yml    # Docker Compose configuration
 ├── mosquitto.conf        # Configuration for Mosquitto MQTT broker
