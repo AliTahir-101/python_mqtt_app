@@ -39,6 +39,8 @@ Before running this project, ensure you have the following installed:
 3. **Build and Run with Docker Compose:**
 
    ```bash
+   sudo systemctl stop mongod (Optional - Stop the Native MongoDB Service)
+
    sudo docker-compose up --build
    ```
 
