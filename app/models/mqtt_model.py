@@ -60,3 +60,16 @@ class LogEntry(BaseModel):
             ObjectId: lambda oid: str(oid),
             PyObjectId: lambda oid: str(oid)
         }
+        schema_extra = {
+            "example": {
+                "id": "6585fdf275bc18953fe35770",
+                "timestamp": "2023-12-18 18:38:31",
+                "topic": "charger/1/connector/1/session/1",
+                "payload": {
+                    "session_id": 1,
+                    "energy_delivered_in_kWh": 30.12,
+                    "duration_in_seconds": 45,
+                    "session_cost_in_cents": 70
+                }
+            }
+        }

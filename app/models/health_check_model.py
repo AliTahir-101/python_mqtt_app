@@ -15,3 +15,8 @@ class HealthCheckResponse(BaseModel):
                       experiencing issues.
     """
     status: str
+
+    class Config:
+        schema_extra = {
+            "example": {"status": "ok"}
+        }
