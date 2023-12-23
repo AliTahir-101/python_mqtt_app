@@ -44,6 +44,13 @@ Before running this project, ensure you have the following installed:
 
    This will start the MQTT broker (Mosquitto), MongoDB, and the Python application.
 
+   Note: If you get `bind: address` error regarding `mqtt`, You need to find the PID and stop the Running Mosquitto Broker before building the docker.
+
+   ```bash
+   sudo lsof -i tcp:1883
+   sudo kill <PID>
+   ```
+
 4. **Accessing the API Docs:**
    The FastAPI server runs on port 8000. Access the API Docs at `http://localhost:8000/docs`.
 
