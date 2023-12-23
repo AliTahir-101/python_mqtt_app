@@ -12,6 +12,12 @@ logger = logging.getLogger(__name__)
 @router.get(
     "/messages",
     response_model=List[LogEntry],
+    summary="Retrieve Energy Session Logs",
+    description=(
+        "Fetches a list of all energy session logs stored in the database. "
+        "Each log entry contains details about energy consumption, session duration, and cost. "
+        "Data is simulated and updated every minute, reflecting real-time energy usage by various devices."
+    ),
     responses={
         200: {
             "description": "Successful Response",
